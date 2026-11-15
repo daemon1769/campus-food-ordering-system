@@ -1,0 +1,8 @@
+{
+  "name": "Remix Centralized Campus Food Ordering System",
+  "description": "Cashless campus food ordering, semester ledger, and nutrition tracking DBMS project by P2 Group-18.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
