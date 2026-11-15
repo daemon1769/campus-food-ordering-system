@@ -4,7 +4,7 @@
 - **Course:** CS F212 Database Systems — Final Project
 - **Lab & Team ID:** P2 Group-18
 - **Repository:** https://github.com/daemon1769/campus-food-ordering-system/
-
+- **Final Tag (`final`) & Submitted Commit Hash:** 
 ---
  
 ## Project Description
