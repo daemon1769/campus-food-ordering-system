@@ -1,15 +1,112 @@
 # Centralized Campus Food Ordering System
-
+ 
 - **Project Title:** Centralized Campus Food Ordering System
 - **Course:** CS F212 Database Systems — Final Project
 - **Lab & Team ID:** P2 Group-18
 - **Repository:** https://github.com/daemon1769/campus-food-ordering-system/
-- **Final Tag (`final`) & Submitted Commit Hash:** 
-
+- **Final Tag (`final`) & Submitted Commit Hash:** `<paste commit hash here>`
 ---
-
+ 
+## Project Description
+ 
+Campus food courts suffer from long queues, separate cash payments at every counter, and no central way for students to track what they spend or eat. The **Centralized Campus Food Ordering System** is a full-stack, cashless food-ordering application built on a relational database. It serves three types of users:
+ 
+- **Students** order from any campus outlet using a prepaid semester ledger (₹12,000 default credit), receive a daily token number, and track their spending and nutrition by day, week, or month.
+- **Food Outlets** receive orders in a live queue, accept/reject them, mark them ready, toggle item availability, and view revenue analytics.
+- **Union Admin** registers outlets, students, menu items, and extras, and audits system-wide spending and revenue through analytical SQL queries and CSV exports.
+Key business rules (logical 6 AM–4 AM business day, per-outlet daily tokens, one active order per outlet, delayed balance deduction on acceptance, and a strict order-status lifecycle) are enforced inside the database using keys, CHECK constraints, triggers, views, indexes, and ACID transactions. The full design is described in the Database Design Document submitted with this repository.
+ 
+---
+ 
+## Team Members & BITS IDs
+ 
+| # | Name | BITS ID |
+| :- | :--- | :--- |
+| 1 | Singireddy Hrushikesh Reddy | `2024AAPS0239H` |
+| 2 | Kartikey Gaur | `2024AAPS0225H` |
+| 3 | Deeptimahanti Aashrith | `2024AAPS0189H` |
+| 4 | Aryaman Ray | `2024AAPS0227H` |
+| 5 | Kothapalli Manobhiram Reddy | `2024AAPS0240H` |
+ 
+---
+ 
+## Technology Stack
+ 
+- **Frontend:** React 19 + TypeScript + Vite + Tailwind CSS + Lucide Icons
+- **Backend:** Node.js (v22.5+) + Express.js REST API with Strict Role-Based Access Control (RBAC)
+- **Database:** Embedded Relational SQLite3 (`node:sqlite` with `PRAGMA foreign_keys = ON` and `WAL` mode) + PostgreSQL Reference DDL (`database/postgresql_reference.sql`)
+---
+ 
+## Step-by-Step Reproducibility Instructions
+ 
+### 1. Prerequisites
+- **Node.js v22.5+** (includes built-in `node:sqlite`) and `npm`
+### 2. Install Dependencies
+```bash
+npm install
+```
+ 
+### 3. Start the Full-Stack Development Server
+```bash
+npm run dev
+```
+Open `http://localhost:3000` in your browser. On startup, `src/db/database.ts` automatically initializes `campus_food.db`, executes `database/schema.sql` and `database/triggers_and_views.sql`, and populates all 9 3NF tables.
+ 
+### 4. Run Automated Verification & Unit Tests
+```bash
+npm test
+```
+ 
+### 5. Build & Run for Production
+```bash
+npm run build
+npm start
+```
+ 
+### 6. Database & Sample Data
+- The database file `campus_food.db` is not committed (it is listed in `.gitignore`); it is created and seeded automatically on the first `npm run dev` / `npm start`, so no data download is needed.
+- To reset to fresh sample data, stop the server, delete `campus_food.db`, `campus_food.db-wal`, and `campus_food.db-shm`, and start the server again.
+- Optional manual inspection with the SQLite CLI, using the standalone scripts in `database/`:
+```bash
+sqlite3 campus_food_manual.db < database/schema.sql
+sqlite3 campus_food_manual.db < database/triggers_and_views.sql
+sqlite3 campus_food_manual.db < database/seed_sample.sql
+sqlite3 campus_food_manual.db < database/queries.sql
+```
+ 
+---
+ 
+## Role-Based Login Credentials (Lab Demo)
+ 
+Each logged-in role is strictly locked to its own portal UI and backend API routes:
+ 
+- **Student** (`2024AAPS0225H` / `student123`, or debt test case `2024A7PS0101H` / `student123`): Strictly accesses the **Student Portal** for their own account to browse available menus, select parcel/dietary-neutral extras, place orders, cancel `Pending` orders, and track daily/weekly/monthly nutrition and semester ledger balance.
+- **Food Outlet** (`Hotspot` / `outlet123`, `Yumppies` / `outlet123`, etc.): Strictly accesses the **Outlet Portal** for their own outlet to accept/reject/mark orders ready, toggle live menu item availability (`is_available`), and inspect category/item revenue analytics.
+- **Union Admin** (`ADM001` / `admin123`): Strictly accesses the **Union Admin Portal** to register new outlets, standardize menu items, add dietary-neutral extras, run live DBMS analytical queries, and export audit CSVs.
+---
+ 
+## 3 End-to-End Workflows
+ 
+1. **Workflow 1: Union Setup and Auditing**
+   - The Union creates new food outlets in the system and standardizes their specific menus.
+   - They define every item's attribute, including base price, category (e.g., rice, tiffin, juice), dietary type (veg/non-veg), parcel surcharges, and exact nutritional values (calories, protein).
+   - The Union can run administrative queries to generate Excel-style breakdowns of any student's total semester expenditure or any outlet's total revenue.
+2. **Workflow 2: Student Ordering and Tracking**
+   - Students log in to view their current semester ledger balance alongside their cumulative spending and nutritional intake, which can be filtered by day, week, or month.
+   - They browse an outlet's menu, viewing only items currently marked "available." They can filter items by category or dietary preference (with neutral add-ons like extra cheese appearing in both veg and non-veg filters).
+   - The cart dynamically calculates total cost (including parcel fees) and total nutrition.
+   - **Order Logic & Constraints:** A student can place simultaneous orders at different outlets, but the database restricts them from placing a new order at the same outlet until their previous order is marked "Ready." Students can cancel an order as long as it is in the "Pending" state.
+   - Upon ordering, the student receives a unique Daily Token Number (e.g., `#101`). This sequence is unique per outlet and resets daily based on the logical business day (6 AM to 4 AM).
+3. **Workflow 3: Outlet Fulfilment and Analytics**
+   - Vendors can instantly toggle the live availability of their menu items.
+   - Outlets receive incoming "Pending" orders and choose to Accept or Reject them.
+   - **Delayed Financial Transaction:** The database executes an ACID transaction to deduct the funds from the student's central balance only at the exact moment the outlet clicks "Accept."
+   - Once prepared, the outlet updates the order status to "Ready."
+   - Outlets access advanced reporting dashboards powered by grouping and aggregation queries, allowing them to view daily, weekly, and monthly income, complete with category-wise and item-wise revenue breakdowns.
+---
+ 
 ## Team Members & Individual Contributions (5-Part Division)
-
+ 
 | # | Name | BITS ID | Assigned Module & Individual Contributions |
 | :- | :--- | :--- | :--- |
 | **1** | **Singireddy Hrushikesh Reddy** | `2024AAPS0239H` | **Database & Backend (Core Schema & Setup APIs)** — Designed the core 3NF database schema and performance indexes for students, outlets, and admins, configured the SQLite database connection, and built the backend APIs for registering outlets/students, adding menu items, and loading student dashboards. |
@@ -17,42 +114,11 @@
 | **3** | **Deeptimahanti Aashrith** | `2024AAPS0189H` | **Frontend UI & Portals** — Built the login page and the three role-locked user interfaces: the Student Portal (menu browsing, cart, token tracking, and nutrition charts), the Outlet Portal (live order queue and item availability toggles), and the Union Admin Portal (setup forms, reports, and CSV downloads). |
 | **4** | **Aryaman Ray** | `2024AAPS0227H` | **Backend Authentication, App Rules & Testing** — Implemented login, logout, password hashing, session tokens, and password-change backend endpoints, wrote the shared business logic for cart totals and the 6 AM–4 AM business day, and created the automated unit and integration tests. |
 | **5** | **Kothapalli Manobhiram Reddy** | `2024AAPS0240H` | **Backend Analytics, Sample Data & Project Integration** — Built the backend dashboard and audit reporting APIs, wrote the analytical SQL queries and CSV report generators, created the multi-table sample dataset seeder, and handled build configuration and project documentation. |
-
+ 
 ---
-
-## Technology Stack
-
-- **Frontend:** React 19 + TypeScript + Vite + Tailwind CSS + Lucide Icons
-- **Backend:** Node.js (v22.5+) + Express.js REST API with Strict Role-Based Access Control (RBAC)
-- **Database:** Embedded Relational SQLite3 (`node:sqlite` with `PRAGMA foreign_keys = ON` and `WAL` mode) + PostgreSQL Reference DDL (`database/postgresql_reference.sql`)
-
----
-
-## 3 End-to-End Workflows
-
-1. **Workflow 1: Union Setup and Auditing**
-   - The Union creates new food outlets in the system and standardizes their specific menus.
-   - They define every item's attribute, including base price, category (e.g., rice, tiffin, juice), dietary type (veg/non-veg), parcel surcharges, and exact nutritional values (calories, protein).
-   - The Union can run administrative queries to generate Excel-style breakdowns of any student's total semester expenditure or any outlet's total revenue.
-
-2. **Workflow 2: Student Ordering and Tracking**
-   - Students log in to view their current semester ledger balance alongside their cumulative spending and nutritional intake, which can be filtered by day, week, or month.
-   - They browse an outlet's menu, viewing only items currently marked "available." They can filter items by category or dietary preference (with neutral add-ons like extra cheese appearing in both veg and non-veg filters).
-   - The cart dynamically calculates total cost (including parcel fees) and total nutrition.
-   - **Order Logic & Constraints:** A student can place simultaneous orders at different outlets, but the database restricts them from placing a new order at the same outlet until their previous order is marked "Ready." Students can cancel an order as long as it is in the "Pending" state.
-   - Upon ordering, the student receives a unique Daily Token Number (e.g., `#101`). This sequence is unique per outlet and resets daily based on the logical business day (6 AM to 4 AM).
-
-3. **Workflow 3: Outlet Fulfilment and Analytics**
-   - Vendors can instantly toggle the live availability of their menu items.
-   - Outlets receive incoming "Pending" orders and choose to Accept or Reject them.
-   - **Delayed Financial Transaction:** The database executes an ACID transaction to deduct the funds from the student's central balance only at the exact moment the outlet clicks "Accept."
-   - Once prepared, the outlet updates the order status to "Ready."
-   - Outlets access advanced reporting dashboards powered by grouping and aggregation queries, allowing them to view daily, weekly, and monthly income, complete with category-wise and item-wise revenue breakdowns.
-
----
-
+ 
 ## 21-File Project Architecture
-
+ 
 | # | File Path | Purpose |
 | :- | :--- | :--- |
 | 1 | `database/schema.sql` | 3NF DDL for all 9 relational tables (`STUDENT`, `OUTLET`, `OUTLET_PHONE`, `MENU_ITEM`, `ITEM_EXTRA`, `UNION_ADMIN`, `"ORDER"`, `ORDER_ITEM`, `ORDER_ITEM_EXTRA`) and 4 performance indexes. |
@@ -76,43 +142,4 @@
 | 19 | `src/utils/apiFetch.ts` | Authenticated `fetch` wrapper attaching session Bearer tokens and credentials. |
 | 20 | `src/types.ts` | Shared TypeScript interfaces for all 9 relations, API payloads, and analytics structures. |
 | 21 | `package.json` | Project metadata, scripts (`dev`, `build`, `start`, `lint`, `test`), and dependencies. |
-
----
-
-## Step-by-Step Reproducibility Instructions
-
-### 1. Prerequisites
-- **Node.js v22.5+** (includes built-in `node:sqlite`) and `npm`
-
-### 2. Install Dependencies
-```bash
-npm install
-```
-
-### 3. Start the Full-Stack Development Server
-```bash
-npm run dev
-```
-Open `http://localhost:3000` in your browser. On startup, `src/db/database.ts` automatically initializes `campus_food.db`, executes `database/schema.sql` and `database/triggers_and_views.sql`, and populates all 9 3NF tables.
-
-### 4. Run Automated Verification & Unit Tests
-```bash
-npm test
-```
-
-### 5. Build & Run for Production
-```bash
-npm run build
-npm start
-```
-
----
-
-## Role-Based Login Credentials (Lab Demo)
-
-Each logged-in role is strictly locked to its own portal UI and backend API routes:
-
-- **Student** (`2024AAPS0225H` / `student123`, or debt test case `2024A7PS0101H` / `student123`): Strictly accesses the **Student Portal** for their own account to browse available menus, select parcel/dietary-neutral extras, place orders, cancel `Pending` orders, and track daily/weekly/monthly nutrition and semester ledger balance.
-- **Food Outlet** (`Hotspot` / `outlet123`, `Yumppies` / `outlet123`, etc.): Strictly accesses the **Outlet Portal** for their own outlet to accept/reject/mark orders ready, toggle live menu item availability (`is_available`), and inspect category/item revenue analytics.
-- **Union Admin** (`ADM001` / `admin123`): Strictly accesses the **Union Admin Portal** to register new outlets, standardize menu items, add dietary-neutral extras, run live DBMS analytical queries, and export audit CSVs.
 
